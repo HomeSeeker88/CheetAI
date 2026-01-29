@@ -6,11 +6,11 @@ import numpy as np
 class Model(ABC):
 
     @abstractmethod
-    def fit(self, input: np.ndarray) -> None:
+    def fit(self, x: np.ndarray, y:np.ndarray) -> None:
         pass
 
     @abstractmethod
-    def predict(self, input: np.ndarray | np.float_) -> np.ndarray | np.float_:
+    def predict(self, input: np.ndarray | np.float64) ->  np.ndarray | np.float64:
         pass
 
     @abstractmethod
