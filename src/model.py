@@ -14,7 +14,7 @@ class Model(ABC):
         pass
 
     @abstractmethod
-    def evaluate(self):
+    def evaluate(self, y_pred_values: np.ndarray):
         pass
 
     def split_train_test(self, input: np.ndarray, proportion: float) -> tuple([np.ndarray, np.ndarray]):

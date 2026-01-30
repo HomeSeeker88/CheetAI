@@ -18,11 +18,13 @@ class LinearRegressionSummary(Summary):
     mse: Mean Squared Error
     mae: Mean Absolute Error
     r_squared: R Squared
+    error_normality: error normality
     """
     rmse: float
     mse: float
     mae: float
     r_squared: float
+    error_normality: bool
 
     model_config = ConfigDict(arbitrary_types_allowed = True, from_attributes = True)
 
