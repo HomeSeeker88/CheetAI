@@ -6,7 +6,9 @@ from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 from matplotlib.lines import Line2D
+from scipy.stats import shapiro
 
+from src.Summaries.Summaries import LinearRegressionSummary
 from src.model import Model
 
 
@@ -25,35 +27,43 @@ class LinearRegression(Model):
 
         self.weight = a
         self.bias = b
+        self.train_x = x_values
+        self.train_y = y_values
 
     def predict(self, input: np.ndarray | np.float64) ->  np.ndarray:
         return input * self.weight + self.bias
 
-    def _calculate_mean_square_error(self, y_values: np.ndarray, y_pred_values: np.ndarray) -> np.float64:
+    def _calculate_mean_square_error(self,  y_pred_values: np.ndarray) -> np.float64:
 
-        if len(y_values) != len(y_pred_values):
+        if len(self.train_y) != len(y_pred_values):
             raise ValueError("Vectors must be the same size!")
-        return np.sum(np.power((y_values - y_pred_values),2))/len(y_values)
+        return np.sum(np.power((self.train_y - y_pred_values),2))/len(self.train_y)
 
-    def _calculate_mean_error(self, y_values: np.ndarray, y_pred_values: np.ndarray) -> np.float64:
-        if len(y_values) != len(y_pred_values):
+    def _calculate_mean_absolute_error(self, y_pred_values: np.ndarray) -> np.float64:
+        if len(self.train_y) != len(y_pred_values):
             raise ValueError("Vectors must be the same size!")
-        return np.sum(np.abs(y_values - y_pred_values)) / len(y_values)
+        return np.sum(np.abs(self.train_y - y_pred_values)) / len(self.train_y)
 
-    def _calculate_root_mean_squared_error(self, y_values: np.ndarray, y_pred_values: np.ndarray) -> np.float64:
-        return np.sqrt(self._calculate_mean_square_error(y_values=y_values,y_pred_values=y_pred_values))
+    def _calculate_root_mean_squared_error(self,  y_pred_values: np.ndarray) -> np.float64:
+        return np.sqrt(self._calculate_mean_square_error(y_pred_values=y_pred_values))
 
-    def _calculate_residual_sum_of_squares(self, y_values: np.ndarray, y_pred_values: np.ndarray) -> np.float64:
-        if len(y_values) != len(y_pred_values):
+    def _calculate_residual_sum_of_squares(self, y_pred_values: np.ndarray) -> np.float64:
+        if len(self.train_y) != len(y_pred_values):
             raise ValueError("Vectors must be the same size!")
-        return np.sum(np.pow(y_values - y_pred_values,2))
-    def _calculate_total_sum_of_squares(self, y_values: np.ndarray) -> np.float64:
-        return np.sum(np.pow(y_values - np.mean(y_values), 2))
+        return np.sum(np.pow(self.train_y - y_pred_values,2))
+    def _calculate_total_sum_of_squares(self) -> np.float64:
+        return np.sum(np.pow(self.train_y - np.mean(self.train_y), 2))
 
-    def _calculate_r_square(self, y_values: np.ndarray, y_pred_values: np.ndarray) -> np.float64:
-        return 1 - self._calculate_residual_sum_of_squares(y_values=y_values, y_pred_values=y_pred_values) / self._calculate_total_sum_of_squares(y_values=y_values)
-    def evaluate(self):
-        pass
+    def _calculate_r_square(self, y_pred_values: np.ndarray) -> np.float64:
+        return 1 - self._calculate_residual_sum_of_squares(y_pred_values=y_pred_values) / self._calculate_total_sum_of_squares()
+
+    def _check_error_normality(self):
+
+    def evaluate(self, y_pred_values: np.ndarray):
+        self.summary = LinearRegressionSummary(rmse = self._calculate_total_sum_of_squares(),
+                                               mse = self._calculate_mean_square_error(y_pred_values=y_pred_values),
+                                               mae = self._calculate_mean_absolute_error(y_pred_values=y_pred_values),
+                                               r_squared = self._calculate_r_square(y_pred_values=y_pred_values))
 
     def dry_plot(self, x_values: np.ndarray, y_values: np.ndarray, y_pred_values: np.ndarray) -> tuple[Figure, Axes]:
         fig, ax = plt.subplots()
@@ -72,7 +82,7 @@ class LinearRegression(Model):
 
 if __name__ == "__main__":
     x = np.array([1, 2, 3, 4, 5, 6, 7, 8])
-    y = np.array([-34,-22,-7,0,2.3, 20,-2, 314])
+    y = np.array([-34,-22,-7,0,2.3, 20,109, 314])
 
     lr = LinearRegression()
     lr.fit(x_values=x, y_values=y)
@@ -81,9 +91,6 @@ if __name__ == "__main__":
     pl = lr.dry_plot(x_values=x,y_values=y,y_pred_values=y_pred)
     #plt.show()
 
-    print(lr._calculate_mean_square_error(y, y_pred))
-    print(lr._calculate_mean_error(y, y_pred))
-    print(lr._calculate_root_mean_squared_error(y, y_pred))
-    print(lr._calculate_residual_sum_of_squares(y, y_pred))
-    print(lr._calculate_total_sum_of_squares(y))
-    print(lr._calculate_r_square(y, y_pred))
+    lr.evaluate(y_pred_values=y_pred)
+    print(lr.summary)
+

@@ -1,13 +1,13 @@
 from typing import Optional
 
 import numpy as np
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class Summary(BaseModel):
-    precision: Optional[np.float64]
-    recall: Optional[np.float64]
-    accuracy: Optional[np.float64]
+    precision: Optional[float] = None
+    recall: Optional[float] = None
+    accuracy: Optional[float] = None
 
     class Config:
         from_attributes = True
@@ -17,8 +17,12 @@ class LinearRegressionSummary(Summary):
     rmse: Root Mean Squared Error
     mse: Mean Squared Error
     mae: Mean Absolute Error
+    r_squared: R Squared
     """
-    rmse: np.float64
-    mse: np.float64
-    mae: np.float64
-    r_squared: np.float64
+    rmse: float
+    mse: float
+    mae: float
+    r_squared: float
+
+    model_config = ConfigDict(arbitrary_types_allowed = True, from_attributes = True)
+
