@@ -17,17 +17,17 @@ class LinearRegression(Model):
     def __init__(self):
         self.weight = 0
         self.bias = 0
+        self.coefficients = np.array([])
 
     def fit(self, x_values: np.ndarray | list[np.ndarray], y_values: np.ndarray) -> None:
         self.y_avg = np.mean(y_values)
         if isinstance(x_values, list):
-            self.coefficients = np.array([])
             coef_vars = None
             for x_arr in x_values:
                 a = self._calculate_coefficient(x_arr, y_values)
                 a_x = a * x_arr
                 coef_vars = np.vstack((coef_vars,a_x)) if coef_vars is not None else a_x
-                np.append(self.coefficients, a)
+                self.coefficients = np.append(self.coefficients, a)
             b = self.y_avg - coef_vars
         else:
             x_avg = np.mean(x_values)
@@ -45,8 +45,8 @@ class LinearRegression(Model):
             np.power((x_values - x_avg), 2))
         return a
 
-    def predict(self, input: np.ndarray | np.float64) ->  np.ndarray:
-        return input * self.weight + self.bias
+    def predict(self, input: np.ndarray | np.float64 | list[np.ndarray]) ->  np.ndarray:
+        return input * self.weight + self.bias #if isinstance(input, list) else input * self.coefficients + self.bias
 
     def _calculate_mean_square_error(self,  y_pred_values: np.ndarray) -> np.float64:
 
@@ -112,12 +112,6 @@ if __name__ == "__main__":
     lr.evaluate(y_pred_values=y_pred)
     print(lr.summary)
 
-    x1 = np.array([1,24,4])
-    x2 = np.array([1,24,4])
-    x3 = np.array([1,24,4])
-
-    x_con = np.array([x1,x2,x3])
-    x_null = np.array([])
-    x_con_2 = np.vstack((x_null,x1,x2,x3))
-    print(x_con)
-    print(x_con_2)
+    x1 = np.array([1,2,3])
+    x2 = np.array([1,2,3])
+    print(np.multiply(x1,x2))
