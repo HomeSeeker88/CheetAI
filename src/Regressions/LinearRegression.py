@@ -19,21 +19,22 @@ class LinearRegression(Model):
         self.bias = 0
 
     def fit(self, x_values: np.ndarray | list[np.ndarray], y_values: np.ndarray) -> None:
+        self.y_avg = np.mean(y_values)
         if isinstance(x_values, list):
+            self.coefficients = np.array([])
             coef_vars = None
             for x_arr in x_values:
-                a = self._calculate_coefficients(x_arr, y_values)
+                a = self._calculate_coefficient(x_arr, y_values)
                 a_x = a * x_arr
                 coef_vars = np.vstack((coef_vars,a_x)) if coef_vars is not None else a_x
-            #    coe
-            #b = y_avg -
+                np.append(self.coefficients, a)
+            b = self.y_avg - coef_vars
         else:
             x_avg = np.mean(x_values)
-            y_avg = np.mean(y_values)
             a = self._calculate_coefficient(x_values = x_values, y_values = y_values)
-            b = y_avg - a * x_avg
+            b = self.y_avg - a * x_avg
             self.weight = a
-            self.bias = b
+        self.bias = b
         self.train_x = x_values
         self.train_y = y_values
 
