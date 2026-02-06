@@ -133,3 +133,5 @@ if __name__ == "__main__":
     y_pred_multiple_vars = lr_multiple_vars.predict([x1, x2])
     print(lr_multiple_vars.coefficients, lr_multiple_vars.bias)
     print(y_pred_multiple_vars)
+    lr_multiple_vars.evaluate(y_pred_values=y_pred_multiple_vars)
+    print(lr_multiple_vars.summary)
