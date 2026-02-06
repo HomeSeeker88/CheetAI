@@ -21,20 +21,19 @@ class LinearRegression(Model):
 
     def fit(self, x_values: np.ndarray | list[np.ndarray], y_values: np.ndarray) -> None:
         self.y_avg = np.mean(y_values)
+        self.bias = self.y_avg
         if isinstance(x_values, list):
-            coef_vars = None
-            for x_arr in x_values:
-                a = self._calculate_coefficient(x_arr, y_values)
-                a_x = a * x_arr
-                coef_vars = np.vstack((coef_vars,a_x)) if coef_vars is not None else a_x
-                self.coefficients = np.append(self.coefficients, a)
-            b = self.y_avg - coef_vars
+            x_values = np.column_stack(x_values)
+            ones = np.ones((x_values.shape[0], 1))
+            x_values = np.hstack((ones, x_values))
+            x_values_t = np.transpose(x_values)
+            self.coefficients = np.matmul(np.matmul(np.linalg.inv(np.matmul(x_values_t, x_values)), x_values_t), y_values)
         else:
             x_avg = np.mean(x_values)
-            a = self._calculate_coefficient(x_values = x_values, y_values = y_values)
+            a = self._calculate_coefficient(x_values=x_values, y_values=y_values)
             b = self.y_avg - a * x_avg
-            self.weight = a
-        self.bias = b
+            self.coefficients = np.array([b, a])
+        self.bias = self.coefficients[0]
         self.train_x = x_values
         self.train_y = y_values
 
@@ -45,8 +44,14 @@ class LinearRegression(Model):
             np.power((x_values - x_avg), 2))
         return a
 
-    def predict(self, input: np.ndarray | np.float64 | list[np.ndarray]) ->  np.ndarray:
-        return input * self.weight + self.bias #if isinstance(input, list) else input * self.coefficients + self.bias
+    def predict(self, input: np.ndarray | list[np.ndarray]) -> np.ndarray:
+        # Multiple variables
+        if isinstance(input, list):
+            X = np.column_stack(input)  # shape: (n_samples, n_features)
+            return self.coefficients[0] + X @ self.coefficients[1:]
+
+        # Single variable
+        return self.coefficients[0] + input * self.coefficients[1]
 
     def _calculate_mean_square_error(self,  y_pred_values: np.ndarray) -> np.float64:
 
@@ -107,6 +112,9 @@ if __name__ == "__main__":
     y_pred = lr.predict(x)
 
     pl = lr.dry_plot(x_values=x,y_values=y,y_pred_values=y_pred)
+    print(lr.coefficients)
+    print(lr.bias)
+    print(y_pred)
     #plt.show()
 
     lr.evaluate(y_pred_values=y_pred)
@@ -115,3 +123,13 @@ if __name__ == "__main__":
     x1 = np.array([1,2,3])
     x2 = np.array([1,2,3])
     print(np.multiply(x1,x2))
+
+    x1 = np.array([168, 188, 165, 195, 165, 182, 173, 190])
+    x2 = np.array([70, 85, 88, 100, 45, 84, 72, 100])
+    y = np.array([70, 82, 90, 106, 47, 85, 71, 94])
+
+    lr_multiple_vars = LinearRegression()
+    lr_multiple_vars.fit(x_values = [x1, x2], y_values=y)
+    y_pred_multiple_vars = lr_multiple_vars.predict([x1, x2])
+    print(lr_multiple_vars.coefficients, lr_multiple_vars.bias)
+    print(y_pred_multiple_vars)
