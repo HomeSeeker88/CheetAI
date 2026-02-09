@@ -13,11 +13,21 @@ class LogisticRegression:
         pass
 
 
-    def mle(self, x: list[np.ndarray], y_values: np.ndarray) -> None:
+    def mle(self, x: np.ndarray, y_values: np.ndarray) -> None:
+        ones = np.argwhere(x>0)
+        zeros = np.argwhere(x==0)
 
-        ones = np.count_nonzero(y_values)
-        zeros = len(y_values) - ones
-        L = scipy.stats.bernoulli(ones/len(y_values))
+        prob_ones = np.sum(y_values[ones])/ len(np.extract(x == 1, x))
+        prob_zeros = np.sum(y_values[zeros])/len(np.extract(x == 0, x))
+
+        beta_zero = np.log(prob_zeros / (1 - prob_zeros))
+        beta_one = np.log(prob_ones / (1 - prob_ones)) - beta_zero
+        self.coefficients = np.append(self.coefficients, beta_zero)
+        self.coefficients = np.append(self.coefficients, beta_one)
+
+
+
+
 
 
 
@@ -25,5 +35,12 @@ class LogisticRegression:
 
 
 if __name__ == "__main__":
+    x = np.array(["smoker","smoker","nonsmoker","nonsmoker","smoker","nonsmoker","nonsmoker","nonsmoker","nonsmoker","smoker","smoker","smoker"])
+
     y = np.array([0,0,0,0,1,1,1,1,1,0,0,0])
+    x_bin = np.where(x == "smoker", 1, 0)
+    print(x_bin)
+    args =np.argwhere(x_bin > 0)
     log = LogisticRegression()
+    print(log.mle(x_bin,y))
+    print(log.coefficients)
