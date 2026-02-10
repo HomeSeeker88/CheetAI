@@ -9,11 +9,17 @@ class LogisticRegression:
 
 
 
-    def fit(self):
-        pass
+    def predict(self, x: np.ndarray|list[np.ndarray]):
+        # Multiple variables
+        if isinstance(x, list):
+            X = np.column_stack(x)  # shape: (n_samples, n_features)
+            return 1/(1+np.pow(np.e, - (self.coefficients[0] + X @ self.coefficients[1:])))
+        # Single variable
+        return 1/(1+np.pow(np.e, -(self.coefficients[0] + x * self.coefficients[1])))
 
 
-    def mle(self, x: np.ndarray, y_values: np.ndarray) -> None:
+
+    def fit(self, x: np.ndarray | list[np.ndarray], y_values: np.ndarray) -> None:
         ones = np.argwhere(x>0)
         zeros = np.argwhere(x==0)
 
@@ -42,5 +48,7 @@ if __name__ == "__main__":
     print(x_bin)
     args =np.argwhere(x_bin > 0)
     log = LogisticRegression()
-    print(log.mle(x_bin,y))
+    print(log.fit(x_bin,y))
     print(log.coefficients)
+    print(log.predict(x =np.array([1,1,1,0])))
+
